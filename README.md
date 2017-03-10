@@ -1,19 +1,9 @@
 # FlowDemo
 
-**TODO: Add description**
+This is a demo of using GenStage/Flow to improve the speed of parsing a largish
+data set. I start with a regular Enum-centric solution, then move to a Stream
+implementation, and finally to Flow.
 
-## Installation
+I'm doing each implementation on a different branch.
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `flow_demo` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [{:flow_demo, "~> 0.1.0"}]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/flow_demo](https://hexdocs.pm/flow_demo).
 
