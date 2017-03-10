@@ -2,14 +2,13 @@ defmodule FlowDemo do
   alias NimbleCSV.RFC4180, as: CSV
 
   def run(file) do
-      parsed_data =
-        File.read!(file)
-        |> CSV.parse_string
-        |> Enum.filter(fn(line) -> Enum.at(line, 2) == "Download" end)
-        |> Enum.map(fn(line) -> transform_line(line) end)
-        |> CSV.dump_to_iodata
-
-      File.write!("test/data/downloads.csv", parsed_data)
+    File.stream!(file)
+    |> CSV.parse_stream
+    |> Stream.filter(fn(line) -> Enum.at(line, 2) == "Download" end)
+    |> Stream.map(fn(line) -> transform_line(line) end)
+    |> CSV.dump_to_stream
+    |> Stream.into(File.stream!("test/data/downloads.csv"))
+    |> Stream.run
   end
 
   defp transform_line(line) do
@@ -24,7 +23,7 @@ defmodule FlowDemo do
     ]
   end
 
-  def calculate_total(per, total_count) do
+  defp calculate_total(per, total_count) do
     String.to_float(per) * String.to_integer(total_count)
   end
 end
