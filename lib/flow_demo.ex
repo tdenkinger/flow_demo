@@ -4,8 +4,9 @@ defmodule FlowDemo do
   def run(file) do
     File.stream!(file)
     |> CSV.parse_stream
-    |> Stream.filter(fn(line) -> Enum.at(line, 2) == "Download" end)
-    |> Stream.map(fn(line) -> transform_line(line) end)
+    |> Flow.from_enumerable
+    |> Flow.filter(fn(line) -> Enum.at(line, 2) == "Download" end)
+    |> Flow.map(fn(line) -> transform_line(line) end)
     |> CSV.dump_to_stream
     |> Stream.into(File.stream!("test/data/downloads.csv"))
     |> Stream.run

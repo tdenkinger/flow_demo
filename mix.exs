@@ -29,6 +29,7 @@ defmodule FlowDemo.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
+      {:flow, "~> 0.11"},
       {:nimble_csv, "~> 0.1.0"},
     ]
   end
