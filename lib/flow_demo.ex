@@ -2,22 +2,28 @@ defmodule FlowDemo do
   alias NimbleCSV.RFC4180, as: CSV
 
   def run(file) do
-    sorted_lines =
-    File.read!(file)
-    |> CSV.parse_string
-    |> Enum.reduce(%{download: [], stream: [], not_found: []}, fn(line, breakdown) ->
-         case Enum.at(line, 2) do
-           "Stream" ->
-             Map.update!(breakdown, :stream, &([transform_line(line) | &1]))
-           "Download" ->
-             Map.update!(breakdown, :download, &([transform_line(line) | &1]))
-           _ ->
-             Map.update!(breakdown, :not_found, &([line | &1]))
-         end
-       end)
+    files = open_files()
 
-    File.write("downloads.txt", CSV.dump_to_iodata(sorted_lines[:download]))
-    File.write("streams.txt",   CSV.dump_to_iodata(sorted_lines[:stream]))
+    File.stream!(file)
+    |> CSV.parse_stream
+    |> Stream.map(fn(el) -> {file_to_write_to(el, files), prep_line(el)} end)
+    |> Stream.each(fn({file, el}) -> IO.write(file, el) end)
+    |> Stream.run
+  end
+
+  defp prep_line(line) do
+    [transform_line(line)] |> CSV.dump_to_iodata
+  end
+
+  defp file_to_write_to([_, _, "Stream", _, _, _], files),   do: files[:streams]
+  defp file_to_write_to([_, _, "Download", _, _, _], files), do: files[:downloads]
+  defp file_to_write_to(_, files),                           do: files[:notfound]
+
+  defp open_files do
+    {:ok, streams}   = File.open("output/streams.txt",   [:write, :utf8])
+    {:ok, downloads} = File.open("output/downloads.txt", [:write, :utf8])
+    {:ok, notfound}  = File.open("output/notfound.txt",  [:write, :utf8])
+    %{streams: streams, downloads: downloads, notfound: notfound}
   end
 
   defp transform_line(line) do
