@@ -6,8 +6,8 @@ defmodule FlowDemo do
 
     File.stream!(file)
     |> CSV.parse_stream
-    |> Stream.map(fn(el) -> {file_to_write_to(el, files), prep_line(el)} end)
-    |> Stream.each(fn({file, el}) -> IO.write(file, el) end)
+    |> Stream.map(fn(line) -> {file_to_write_to(Enum.at(line, 2), files), prep_line(line)} end)
+    |> Stream.each(fn({file, line}) -> IO.write(file, line) end)
     |> Stream.run
   end
 
@@ -15,15 +15,15 @@ defmodule FlowDemo do
     [transform_line(line)] |> CSV.dump_to_iodata
   end
 
-  defp file_to_write_to([_, _, "Stream", _, _, _], files),   do: files[:streams]
-  defp file_to_write_to([_, _, "Download", _, _, _], files), do: files[:downloads]
-  defp file_to_write_to(_, files),                           do: files[:notfound]
+  defp file_to_write_to("Stream", files),   do: files[:streams]
+  defp file_to_write_to("Download", files), do: files[:downloads]
+  defp file_to_write_to(_, files),          do: files[:notfound]
 
   defp open_files do
-    {:ok, streams}   = File.open("output/streams.txt",   [:write, :utf8])
-    {:ok, downloads} = File.open("output/downloads.txt", [:write, :utf8])
-    {:ok, notfound}  = File.open("output/notfound.txt",  [:write, :utf8])
-    %{streams: streams, downloads: downloads, notfound: notfound}
+    %{streams:   File.open!("output/streams.txt",   [:write, :utf8]),
+      downloads: File.open!("output/downloads.txt", [:write, :utf8]),
+      notfound:  File.open!("output/notfound.txt",  [:write, :utf8]),
+    }
   end
 
   defp transform_line(line) do
